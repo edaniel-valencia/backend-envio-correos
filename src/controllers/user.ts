@@ -94,6 +94,7 @@ export const CargarDatosOfExcel = async (req: Request, res: Response) => {
         }))
 
         await User.bulkCreate(users)
+        
 
         res.status(200).json({ msg: 'Mensaje enviado exitosamente' });
 

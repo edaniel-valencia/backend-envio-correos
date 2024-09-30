@@ -2,11 +2,14 @@ import express, {Application, json, urlencoded} from 'express'
 
 import routerEmail from "../routes/email"
 import routerUser from "../routes/user"
+import routerCategory from "../routes/category"
+import routerConfig from "../routes/config"
 import path from 'path';
 
 import cors from 'cors'
 import { User } from '../models/user'
 import { Category } from '../models/category';
+import { Config } from '../models/config'
 
 class Server {
 
@@ -31,14 +34,19 @@ class Server {
     router(){
         this.app.use(routerEmail)
         this.app.use(routerUser)
+        this.app.use(routerCategory)
+        this.app.use(routerConfig)
         
     }
+
 
     async conexionDB(){
         try {
 
-            await User.sync({force: true})
+
+            await User.sync()
             await Category.sync()
+            await Config.sync()
 
             console.log("Conexion Exitosa");
 

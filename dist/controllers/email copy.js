@@ -17,46 +17,40 @@ const nodemailer_1 = __importDefault(require("nodemailer"));
 const user_1 = require("../models/user");
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
-const config_1 = require("../models/config");
+const transporter = nodemailer_1.default.createTransport({
+    host: 'smtp.office365.com',
+    port: 587,
+    secure: false,
+    auth: {
+        user: 'daniblack10.00@hotmail.com',
+        pass: '3dxuy3lvxl398@HM'
+    }
+});
 const SendEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     console.log("Estoy aca");
     const { name, lastname, whatsapp, email, subject, message } = req.body;
     console.log(req.body);
-    const config = yield config_1.Config.findOne({ where: { Cstatus: 1 } });
-    console.log(config);
-    if (!config) {
-        return res.status(500).json({ error: 'No se ha encontrado servidor' });
-    }
-    const from = config.get('Cauth');
+    const from = 'daniblack10.00@hotmail.com';
     const to = 'tsoftwareecuador@gmail.com';
     try {
-        const transporter = nodemailer_1.default.createTransport({
-            host: config.get('Chost'),
-            port: parseInt(config.get('Cport')),
-            secure: config.get('Csecure') === true || config.get('Csecure') === false,
-            auth: {
-                user: config.get('Cauth'),
-                pass: config.get('Cpass')
-            }
-        });
         const mailOptions = {
             to: to,
             from: from,
-            subject: `${subject} CORREO DESDE LA WEB`,
+            subject: subject + ' CORREO DESDE LA WEB',
+            // text:  'Hola desde Tsoftware Ecuador, Envio de Correo con Angular y TypeScript!'
             html: `
-                <div style="font-family: Arial, sans-serif; color: #333;">
-                    <img src="https://www.software.com.ec/assets/logo.f8e0acb1.png" width="25%">
-                    <h1 style="color: #007bff;">¡MENSAJE DESDE EL SITIO WEB!</h1>
-                    <p>Te ha enviado este correo ${name} ${lastname}, y esto son los contactos para comunicarse:
-                    <br><b>Correo: </b> ${email}
-                    <br><b>WhatsApp: </b> ${whatsapp}
-                    <br><b>Mensaje: </b>${message}</p>
-                    <img src="https://img.freepik.com/vector-premium/conjunto-ilustraciones-3d-gestion-tiempo-caracter-usando-recordatorio-notificacion-seguimiento-tiempo_808510-1476.jpg" width="25%">
-                    <p style="font-size: 14px; color: #555;">Saludos,<br>El equipo de soporte</p>
-                </div>
-            `,
+            <div style="font-family: Arial, sans-serif; color: #333;">
+                <img src="https://www.software.com.ec/assets/logo.f8e0acb1.png" width="25%">
+                <h1 style="color: #007bff;">¡MENSAJE DESDE EL SITIO WEB!</h1>
+                <p>Te ha enviado este correo ${name} ${lastname}, y esto son los contactos mas comunicarse:
+                <br><b>Correo: </b> ${email}
+                <br><b>Whatssap: </b> ${whatsapp}
+                <br><b>Mensaje: </b>${message}</p>
+                <img src="https://img.freepik.com/vector-premium/conjunto-ilustraciones-3d-gestion-tiempo-caracter-usando-recordatorio-notificacion-seguimiento-tiempo_808510-1476.jpg" width="25%">
+                <p style="font-size: 14px; color: #555;">Saludos,<br>El equipo de soporte</p>
+            </div>
+        `,
         };
-        // Enviar correo
         const info = yield transporter.sendMail(mailOptions);
         console.log("Mensaje enviado exitosamente", info.response);
         res.status(200).json({ msg: 'Mensaje enviado exitosamente', info: info.response, to: to, from: from });
@@ -96,22 +90,8 @@ const SendEmailMasive = (req, res) => __awaiter(void 0, void 0, void 0, function
     const filePath = path_1.default.join(uploadPath, fileName);
     fs_1.default.writeFileSync(filePath, file.buffer);
     const imageURL = `http://localhost:3001/assets/marketing/${fileName}`;
-    const config = yield config_1.Config.findOne({ where: { Cstatus: 1 } });
-    console.log(config);
-    if (!config) {
-        return res.status(500).json({ error: 'No se ha encontrado servidor' });
-    }
-    const from = config.get('Cauth');
+    const from = 'daniblack10.00@hotmail.com';
     try {
-        const transporter = nodemailer_1.default.createTransport({
-            host: config.get('Chost'),
-            port: parseInt(config.get('Cport')),
-            secure: config.get('Csecure') === true || config.get('Csecure') === false,
-            auth: {
-                user: config.get('Cauth'),
-                pass: config.get('Cpass')
-            }
-        });
         const listEmail = yield getUser();
         if (listEmail.length === 0) {
             res.status(404).json({ msg: 'No se han encontrado datos' });
@@ -168,12 +148,7 @@ const sendMasiveByCategory = (req, res) => __awaiter(void 0, void 0, void 0, fun
     const filePath = path_1.default.join(uploadPath, fileName);
     fs_1.default.writeFileSync(filePath, file.buffer);
     const imageURL = `http://localhost:3001/assets/marketing/${fileName}`;
-    const config = yield config_1.Config.findOne({ where: { Cstatus: 1 } });
-    console.log(config);
-    if (!config) {
-        return res.status(500).json({ error: 'No se ha encontrado servidor' });
-    }
-    const from = config.get('Cauth');
+    const from = 'daniblack10.00@hotmail.com';
     try {
         // const listEmail = await getUser({})
         const listEmail = yield user_1.User.findAll({
@@ -186,15 +161,6 @@ const sendMasiveByCategory = (req, res) => __awaiter(void 0, void 0, void 0, fun
             const email = user.get('Uemail');
             const name = user.get('Uname');
             const lastname = user.get('Ulastname');
-            const transporter = nodemailer_1.default.createTransport({
-                host: config.get('Chost'),
-                port: parseInt(config.get('Cport')),
-                secure: config.get('Csecure') === true || config.get('Csecure') === false,
-                auth: {
-                    user: config.get('Cauth'),
-                    pass: config.get('Cpass')
-                }
-            });
             const mailOptions = {
                 to: email,
                 from: from,

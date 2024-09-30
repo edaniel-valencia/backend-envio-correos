@@ -9,10 +9,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.uploadFile = void 0;
-const user_1 = require("../models/user");
-const uploadFile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const listUser = yield user_1.User.findAll();
-    res.json(listUser);
+exports.ReadCategoryAll = void 0;
+const category_1 = require("../models/category");
+const ReadCategoryAll = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const listCategory = yield category_1.Category.findAll({});
+        if (listCategory.length === 0) {
+            return res.status(404).json({ msg: "No se han encontrado usuarios" });
+        }
+        res.json(listCategory);
+    }
+    catch (error) {
+        return res.status(500).json({ msg: "Error al encontrado usuarios", error });
+    }
 });
-exports.uploadFile = uploadFile;
+exports.ReadCategoryAll = ReadCategoryAll;

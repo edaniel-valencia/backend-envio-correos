@@ -38,10 +38,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importStar(require("express"));
 const email_1 = __importDefault(require("../routes/email"));
 const user_1 = __importDefault(require("../routes/user"));
+const category_1 = __importDefault(require("../routes/category"));
+const config_1 = __importDefault(require("../routes/config"));
 const path_1 = __importDefault(require("path"));
 const cors_1 = __importDefault(require("cors"));
 const user_2 = require("../models/user");
-const category_1 = require("../models/category");
+const category_2 = require("../models/category");
+const config_2 = require("../models/config");
 class Server {
     constructor() {
         this.app = (0, express_1.default)();
@@ -59,12 +62,15 @@ class Server {
     router() {
         this.app.use(email_1.default);
         this.app.use(user_1.default);
+        this.app.use(category_1.default);
+        this.app.use(config_1.default);
     }
     conexionDB() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                yield user_2.User.sync({ force: true });
-                yield category_1.Category.sync();
+                yield user_2.User.sync();
+                yield category_2.Category.sync();
+                yield config_2.Config.sync();
                 console.log("Conexion Exitosa");
             }
             catch (error) {
