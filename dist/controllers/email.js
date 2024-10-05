@@ -18,6 +18,8 @@ const user_1 = require("../models/user");
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const config_1 = require("../models/config");
+const marketing_1 = require("../models/marketing");
+const category_1 = require("../models/category");
 const SendEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     console.log("Estoy aca");
     const { name, lastname, whatsapp, email, subject, message } = req.body;
@@ -33,7 +35,7 @@ const SendEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const transporter = nodemailer_1.default.createTransport({
             host: config.get('Chost'),
             port: parseInt(config.get('Cport')),
-            secure: config.get('Csecure') === true || config.get('Csecure') === false,
+            secure: config.get('Csecure') === 'true' || config.get('Csecure') === 'false',
             auth: {
                 user: config.get('Cauth'),
                 pass: config.get('Cpass')
@@ -106,7 +108,7 @@ const SendEmailMasive = (req, res) => __awaiter(void 0, void 0, void 0, function
         const transporter = nodemailer_1.default.createTransport({
             host: config.get('Chost'),
             port: parseInt(config.get('Cport')),
-            secure: config.get('Csecure') === true || config.get('Csecure') === false,
+            secure: config.get('Csecure') === 'true' || config.get('Csecure') === 'false',
             auth: {
                 user: config.get('Cauth'),
                 pass: config.get('Cpass')
@@ -140,6 +142,18 @@ const SendEmailMasive = (req, res) => __awaiter(void 0, void 0, void 0, function
             };
             const info = yield transporter.sendMail(mailOptions);
             console.log("Mensaje enviado exitosamente", info.response);
+        }
+        try {
+            marketing_1.Marketing.create({
+                Mtitle: title,
+                Mmessage: message,
+                Mtype: 'Todos los correos del sistema',
+                Mstatus: 1
+            });
+            res.status(200).json({ msg: 'Mensaje masivo, guardado exitosamente' });
+        }
+        catch (error) {
+            console.log("Error al guardar el mensaje masivo", error);
         }
         res.status(200).json({ msg: 'Mensajes enviados exitosamente' });
     }
@@ -175,10 +189,8 @@ const sendMasiveByCategory = (req, res) => __awaiter(void 0, void 0, void 0, fun
     }
     const from = config.get('Cauth');
     try {
-        // const listEmail = await getUser({})
-        const listEmail = yield user_1.User.findAll({
-            where: { CategoryId: Cid }
-        });
+        const listEmail = yield user_1.User.findAll({ where: { CategoryId: Cid } });
+        const listCategory = yield category_1.Category.findOne({ where: { Cid: Cid } });
         if (listEmail.length === 0) {
             res.status(404).json({ msg: 'No se han encontrado datos' });
         }
@@ -189,7 +201,7 @@ const sendMasiveByCategory = (req, res) => __awaiter(void 0, void 0, void 0, fun
             const transporter = nodemailer_1.default.createTransport({
                 host: config.get('Chost'),
                 port: parseInt(config.get('Cport')),
-                secure: config.get('Csecure') === true || config.get('Csecure') === false,
+                secure: config.get('Csecure') === 'true' || config.get('Csecure') === 'false',
                 auth: {
                     user: config.get('Cauth'),
                     pass: config.get('Cpass')
@@ -216,7 +228,20 @@ const sendMasiveByCategory = (req, res) => __awaiter(void 0, void 0, void 0, fun
             const info = yield transporter.sendMail(mailOptions);
             console.log("Mensaje enviado exitosamente", info.response);
         }
-        res.status(200).json({ msg: 'Mensajes enviados exitosamente' });
+        const type = `${listCategory === null || listCategory === void 0 ? void 0 : listCategory.dataValues.Cname}`;
+        try {
+            marketing_1.Marketing.create({
+                Mtitle: title,
+                Mimage: fileName,
+                Mmessage: message,
+                Mtype: type,
+                Mstatus: 1
+            });
+            res.status(200).json({ msg: 'Mensaje masivo, guardado exitosamente' });
+        }
+        catch (error) {
+            console.log("Error al guardar el mensaje masivo", error);
+        }
     }
     catch (error) {
         console.log("Error al enviar el mensaje", error);

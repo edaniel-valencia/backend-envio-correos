@@ -40,11 +40,13 @@ const email_1 = __importDefault(require("../routes/email"));
 const user_1 = __importDefault(require("../routes/user"));
 const category_1 = __importDefault(require("../routes/category"));
 const config_1 = __importDefault(require("../routes/config"));
+const marketing_1 = __importDefault(require("../routes/marketing"));
 const path_1 = __importDefault(require("path"));
 const cors_1 = __importDefault(require("cors"));
 const user_2 = require("../models/user");
 const category_2 = require("../models/category");
 const config_2 = require("../models/config");
+const marketing_2 = require("../models/marketing");
 class Server {
     constructor() {
         this.app = (0, express_1.default)();
@@ -64,6 +66,7 @@ class Server {
         this.app.use(user_1.default);
         this.app.use(category_1.default);
         this.app.use(config_1.default);
+        this.app.use(marketing_1.default);
     }
     conexionDB() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -71,6 +74,7 @@ class Server {
                 yield user_2.User.sync();
                 yield category_2.Category.sync();
                 yield config_2.Config.sync();
+                yield marketing_2.Marketing.sync();
                 console.log("Conexion Exitosa");
             }
             catch (error) {
@@ -79,7 +83,7 @@ class Server {
         });
     }
     midlewares() {
-        this.app.use('/static', express_1.default.static(path_1.default.resolve('static')));
+        this.app.use('/assets', express_1.default.static(path_1.default.resolve('assets')));
         this.app.use(express_1.default.json());
         this.app.use((0, express_1.urlencoded)({ extended: true }));
         this.app.use((0, express_1.json)());

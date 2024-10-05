@@ -4,6 +4,8 @@ import { User } from "../models/user";
 import fs from 'fs';
 import path from 'path';
 import { Config } from "../models/config";
+import { Marketing } from "../models/marketing";
+import { Category } from "../models/category";
 
 
 
@@ -19,12 +21,12 @@ export const SendEmail = async (req: Request, res: Response) => {
 
     const config = await Config.findOne({ where: { Cstatus: 1 } });
     console.log(config);
-    
+
     if (!config) {
         return res.status(500).json({ error: 'No se ha encontrado servidor' })
     }
 
-    const from = config.get('Cauth')as string;
+    const from = config.get('Cauth') as string;
     const to = 'tsoftwareecuador@gmail.com';
     try {
 
@@ -32,7 +34,7 @@ export const SendEmail = async (req: Request, res: Response) => {
 
             host: config.get('Chost') as string,
             port: parseInt(config.get('Cport') as string),
-            secure: config.get('Csecure') === true || config.get('Csecure') === false ,
+            secure: config.get('Csecure') === 'true' || config.get('Csecure') === 'false',
             auth: {
                 user: config.get('Cauth') as string,
                 pass: config.get('Cpass') as string
@@ -115,15 +117,15 @@ export const SendEmailMasive = async (req: Request, res: Response) => {
 
     const imageURL = `http://localhost:3001/assets/marketing/${fileName}`
 
-    
+
     const config = await Config.findOne({ where: { Cstatus: 1 } });
     console.log(config);
-    
+
     if (!config) {
         return res.status(500).json({ error: 'No se ha encontrado servidor' })
     }
 
-    const from = config.get('Cauth')as string;
+    const from = config.get('Cauth') as string;
 
     try {
 
@@ -131,14 +133,14 @@ export const SendEmailMasive = async (req: Request, res: Response) => {
 
             host: config.get('Chost') as string,
             port: parseInt(config.get('Cport') as string),
-            secure: config.get('Csecure') === true || config.get('Csecure') === false ,
+            secure: config.get('Csecure') === 'true' || config.get('Csecure') === 'false',
             auth: {
                 user: config.get('Cauth') as string,
                 pass: config.get('Cpass') as string
             }
         })
 
-        
+
         const listEmail = await getUser()
 
         if (listEmail.length === 0) {
@@ -173,6 +175,22 @@ export const SendEmailMasive = async (req: Request, res: Response) => {
 
             const info = await transporter.sendMail(mailOptions);
             console.log("Mensaje enviado exitosamente", info.response);
+
+        }
+
+
+        try {
+            Marketing.create({
+                Mtitle: title,
+                Mmessage: message,
+                Mtype: 'Todos los correos del sistema',
+                Mstatus: 1
+            });
+            res.status(200).json({ msg: 'Mensaje masivo, guardado exitosamente' });
+
+        } catch (error) {
+            console.log("Error al guardar el mensaje masivo", error);
+
         }
 
         res.status(200).json({ msg: 'Mensajes enviados exitosamente' });
@@ -185,6 +203,16 @@ export const SendEmailMasive = async (req: Request, res: Response) => {
     }
 
 }
+
+
+
+
+
+
+
+
+
+
 
 export const sendMasiveByCategory = async (req: Request, res: Response) => {
 
@@ -219,24 +247,24 @@ export const sendMasiveByCategory = async (req: Request, res: Response) => {
 
     const config = await Config.findOne({ where: { Cstatus: 1 } });
     console.log(config);
-    
+
     if (!config) {
         return res.status(500).json({ error: 'No se ha encontrado servidor' })
     }
 
-    const from = config.get('Cauth')as string;
+    const from = config.get('Cauth') as string;
     try {
 
-        // const listEmail = await getUser({})
-        const listEmail = await User.findAll({
-            where: { CategoryId: Cid }
-        });
+        const listEmail = await User.findAll({ where: { CategoryId: Cid } });
+
+        const listCategory = await Category.findOne({ where: { Cid: Cid } });
 
 
 
         if (listEmail.length === 0) {
             res.status(404).json({ msg: 'No se han encontrado datos' });
         }
+
 
         for (const user of listEmail) {
 
@@ -248,12 +276,15 @@ export const sendMasiveByCategory = async (req: Request, res: Response) => {
 
                 host: config.get('Chost') as string,
                 port: parseInt(config.get('Cport') as string),
-                secure: config.get('Csecure') === true || config.get('Csecure') === false ,
+                secure: config.get('Csecure') === 'true' || config.get('Csecure') === 'false',
                 auth: {
                     user: config.get('Cauth') as string,
                     pass: config.get('Cpass') as string
                 }
             })
+    
+
+            
             const mailOptions = {
                 to: email,
                 from: from,
@@ -277,8 +308,23 @@ export const sendMasiveByCategory = async (req: Request, res: Response) => {
             const info = await transporter.sendMail(mailOptions);
             console.log("Mensaje enviado exitosamente", info.response);
         }
+        const type = `${listCategory?.dataValues.Cname}`
+        try {
+            Marketing.create({
+                Mtitle: title,
+                Mimage: fileName,
+                Mmessage: message,
+                Mtype: type,
+                Mstatus: 1
+            });
+            res.status(200).json({ msg: 'Mensaje masivo, guardado exitosamente' });
 
-        res.status(200).json({ msg: 'Mensajes enviados exitosamente' });
+        } catch (error) {
+            console.log("Error al guardar el mensaje masivo", error);
+
+        }
+
+
 
     } catch (error) {
 

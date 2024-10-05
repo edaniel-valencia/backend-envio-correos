@@ -5,4 +5,6 @@ const config_1 = require("../controllers/config");
 const router = (0, express_1.Router)();
 router.post("/api/config/create", config_1.Create);
 router.get("/api/config/read", config_1.Read);
+router.patch("/api/config/update/:Cid", config_1.Update);
+router.delete("/api/config/delete/:Cid", config_1.Delete);
 exports.default = router;
